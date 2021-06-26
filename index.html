@@ -1,1 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Runner Game</title>
+    
+    <style>
+        canvas{
+           border:10px solid black;
+           background-color: skyblue;
+        }
+    </style>
+</head>
+<body onload="start()">
 
+    <script>
+        var obstaclearray=[];
+var obstaclearray1=[];
+
+
+function start(){
+    gamearea.start();
+}
+var maxWidth=1200;
+var minWidth=400;
+function obstacle(){
+  this.height=100;
+  this.height1=100;
+  this.width=Math.random()*(maxWidth)+1.5*minWidth;
+  this.width1=Math.random()*(maxWidth)+1.5*minWidth;
+    if(obstaclearray.length==1){
+        this.x=50;
+    }
+    else{
+        this.x=1200;
+    }
+    if(obstaclearray1.length==1){
+        this.x1=0;
+    }
+    else{
+        this.x1=1200;
+    }
+  this.y=450;
+  this.y1=0;
+  this.draw=function (){
+    gamearea.context.fillRect(this.x,this.y,this.width,this.height);
+    
+  }
+  this.draw1=function (){
+    gamearea.context.fillRect(this.x1,this.y1,this.width1,this.height1);
+    
+  }
+  
+}
+
+function everyinterval(n){
+  if(gamearea.frame%n==0)return true;
+  return false;
+}
+
+var player={
+    x:20,
+   y:350,
+   speedY:0,
+   box:0,
+   update:function(){
+       gamearea.context.fillRect(this.x,this.y,100,100);
+   },
+   jump:function(){
+       if(this.box==1){
+     if(this.y<=100)
+     this.speedY=0;
+    this.y+=this.speedY;
+    // console.log(this.y);
+       }
+       else{
+           if(this.y>=350){
+               this.speedY=0;}
+               this.y+=this.speedY;
+            //    console.log(this.y);
+       }
+       
+    // console.log('fergrg');
+   },
+   reducey:function(){
+    if(this.box==0){
+        this.box=1;
+        this.speedY=-2;
+       
+    }
+    else{
+        this.box=0;
+        this.speedY=2;
+        
+    }
+   }
+
+}
+window.addEventListener("click",function(e){
+     if(e.y>100 && e.y<450){
+         if(player.y==100 || player.y==350)
+     player.reducey();
+     }
+})
+
+var scoreText={
+    x:1000,
+    y:130,
+    update:function(text){
+        gamearea.context.fillStyle="green";
+     gamearea.context.font="30px Consolas";
+     gamearea.context.fillText(text,this.x,this.y);
+    }
+}
+var HighscoreText={
+    x:900,
+    y:200,
+    update:function(text){
+        gamearea.context.fillStyle="black";
+        gamearea.context.fillText(text,this.x,this.y);
+    }
+}
+
+
+
+
+
+var gamearea={
+    canvas:document.createElement("canvas"),
+    start:function(){
+        this.canvas.height=550;
+        this.canvas.width=1200;
+        document.body.insertBefore(this.canvas,document.body.childNodes[0]);
+        this.context=this.canvas.getContext("2d");
+        obstaclearray.push(new obstacle());
+        obstaclearray.push(new obstacle());
+        obstaclearray1.push(new obstacle());
+        obstaclearray1.push(new obstacle());
+        this.frame=0;
+        this.score=0;
+        this.highscore=localStorage.getItem("highscore");
+        this.interval=setInterval(this.updategamearea,5);
+        
+        
+    },
+    updategamearea: function(){
+
+        for(var i=0;i<obstaclearray.length;i++){
+            if((player.x)>(obstaclearray[i].x+obstaclearray[i].width) && (player.y+100)==obstaclearray[i].y && (player.x+100)<(obstaclearray[i+1].x) ){
+               
+                gamearea.stop();
+                return ;
+            } 
+            
+            }
+            for(var i=0;i<obstaclearray1.length;i++){
+                if((player.x)>(obstaclearray1[i].x1+obstaclearray1[i].width1) && (player.y-100)==obstaclearray1[i].y1 && (player.x+100)<(obstaclearray1[i+1].x1) ){
+                 
+                    gamearea.stop();
+                    return ;
+                } 
+                
+                }
+    gamearea.clear();
+    if(everyinterval(1500)){
+        obstaclearray.push(new obstacle());}
+        if(everyinterval(1800)){
+        obstaclearray1.push(new obstacle());
+    }
+
+    for(var i=0;i<obstaclearray.length ;i++){
+    obstaclearray[i].x-=1;
+    //console.log(obstaclearray[i].x);
+    obstaclearray[i].draw();
+    }
+for(var i=0;i<obstaclearray1.length;i++){
+    obstaclearray1[i].x1-=1;
+    obstaclearray1[i].draw1();
+    }
+    player.jump();
+    player.update();
+    gamearea.frame+=1;
+    gamearea.score+=.1;
+    scoreText.update("Score: "+Math.floor(gamearea.score));
+    },
+    clear:function(){
+     gamearea.context.clearRect(0,0,this.canvas.width,this.canvas.height);
+     
+    },
+
+    stop:function(){
+     clearInterval(this.interval);
+     
+     if(gamearea.highscore != null){
+        if (gamearea.score > gamearea.highscore) {
+            localStorage.setItem("highscore", gamearea.score);      
+        }
+    }
+    else{
+        localStorage.setItem("highscore", gamearea.score);
+    }
+   HighscoreText.update("Highscore: "+Math.floor(gamearea.highscore));
+    
+    }
+    
+}
+    </script>
+</body>
+</html>
